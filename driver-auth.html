@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход / Регистрация Водителя</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            min-width: 100vw;
+            overflow: hidden;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+        }
+        .video-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 1;
+            /* filter: brightness(0.45) grayscale(0.2) contrast(1.1) saturate(0.8); */
+            filter: none;
+            transition: filter 1s;
+            background: #000;
+        }
+        .overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(120deg, rgba(0,0,0,0.85), rgba(30,30,30,0.7), rgba(0,0,0,0.7));
+            z-index: 2;
+        }
+        .container {
+            position: relative;
+            z-index: 3;
+            background: rgba(20,20,20,0.7);
+            backdrop-filter: blur(10px) saturate(1.1);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.55);
+            width: 350px;
+            text-align: center;
+            margin: 0 auto;
+            top: 50vh;
+            transform: translateY(-50%) scale(0.8);
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(.77,0,.18,1), transform 1.2s cubic-bezier(.77,0,.18,1);
+        }
+        .container.visible {
+            opacity: 1;
+            transform: translateY(-50%) scale(1);
+        }
+        h2 {
+            margin-bottom: 24px;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        input[type="text"], input[type="password"] {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #222;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(30,30,30,0.85);
+            color: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        }
+        input[type="text"]::placeholder, input[type="password"]::placeholder {
+            color: #aaa;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #232526 0%, #414345 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+        button:hover {
+            background: linear-gradient(90deg, #414345 0%, #232526 100%);
+            color: #fff;
+        }
+        .toggle {
+            margin-top: 18px;
+            color: #bbb;
+            cursor: pointer;
+            text-decoration: underline;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+        .error {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            background: rgba(30,30,30,0.85);
+            border-radius: 6px;
+            padding: 4px 0;
+        }
+        .success {
+            color: #27ae60;
+            margin-bottom: 10px;
+            background: rgba(30,30,30,0.85);
+            border-radius: 6px;
+            padding: 4px 0;
+        }
+        @media (max-width: 500px) {
+            .container {
+                width: 95vw;
+                padding: 24px 6vw;
+                border-radius: 12px;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            input, button {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <video class="video-bg" id="bgVideo" src="driver.MP4" autoplay muted playsinline></video>
+    <div class="overlay"></div>
+    <div class="container" id="authContainer">
+        <h2 id="form-title">Вход для водителя</h2>
+        <div id="error-message" class="error" style="display:none;"></div>
+        <form id="login-form">
+            <input type="text" id="login-phone" placeholder="Номер телефона" required pattern="[0-9()+ \-]{10,}" autocomplete="tel"><br>
+            <input type="password" id="login-password" placeholder="Пароль" required><br>
+            <button type="submit">Войти</button>
+        </form>
+        <form id="register-form" style="display:none;">
+            <input type="text" id="register-car" placeholder="Марка авто" required><br>
+            <input type="text" id="register-plate" placeholder="Гос. номер" required><br>
+            <input type="text" id="register-phone" placeholder="Номер телефона" required pattern="[0-9()+ \-]{10,}" autocomplete="tel"><br>
+            <input type="password" id="register-password" placeholder="Пароль" required><br>
+            <input type="password" id="register-password2" placeholder="Повторите пароль" required><br>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <div class="toggle" id="toggle-link">Нет аккаунта? Зарегистрироваться</div>
+    </div>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const toggleLink = document.getElementById('toggle-link');
+        const formTitle = document.getElementById('form-title');
+        const errorMessage = document.getElementById('error-message');
+        const authContainer = document.getElementById('authContainer');
+        const bgVideo = document.getElementById('bgVideo');
+
+        let isLogin = true;
+
+        // Скрываем форму до окончания видео
+        authContainer.classList.remove('visible');
+
+        // После окончания видео — плавная анимация появления формы
+        bgVideo.onended = () => {
+            setTimeout(() => {
+                authContainer.classList.add('visible');
+            }, 200); // уменьшенная задержка для плавности
+        };
+        // Удаляю setTimeout — форма появляется только после окончания видео
+
+        toggleLink.onclick = () => {
+            isLogin = !isLogin;
+            if (isLogin) {
+                loginForm.style.display = '';
+                registerForm.style.display = 'none';
+                formTitle.textContent = 'Вход для водителя';
+                toggleLink.textContent = 'Нет аккаунта? Зарегистрироваться';
+                errorMessage.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = '';
+                formTitle.textContent = 'Регистрация водителя';
+                toggleLink.textContent = 'Уже есть аккаунт? Войти';
+                errorMessage.style.display = 'none';
+            }
+        };
+
+        // Firebase config (тот же, что и в index.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqz-IP1qgXIdPGnOOJ1diy2vcJlWnJA0A",
+            authDomain: "taxi-bbdda.firebaseapp.com",
+            projectId: "taxi-bbdda",
+            storageBucket: "taxi-bbdda.firebasestorage.app",
+            messagingSenderId: "880973833007",
+            appId: "1:880973833007:web:234deca6e3b83b474df7da",
+            measurementId: "G-H224N62NXD"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        loginForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('login-phone').value.trim();
+            const password = document.getElementById('login-password').value;
+            // Поиск водителя по номеру и паролю
+            const query = await db.collection('drivers')
+                .where('phone', '==', phone)
+                .where('password', '==', password)
+                .get();
+            if (!query.empty) {
+                // Успешный вход
+                localStorage.setItem('driver_phone', phone);
+                errorMessage.style.display = 'block';
+                errorMessage.style.color = '#27ae60';
+                errorMessage.textContent = 'Вход выполнен!';
+                // Красивая анимация fade out и переход на страницу профиля водителя
+                document.body.style.transition = 'opacity 0.7s cubic-bezier(.7,0,.3,1)';
+                document.body.style.opacity = '0';
+                setTimeout(() => {
+                    window.location.href = 'driver-main.html';
+                }, 700);
+            } else {
+                errorMessage.style.display = 'block';
+                errorMessage.style.color = '#e74c3c';
+                errorMessage.textContent = 'Неверный номер или пароль!';
+            }
+        };
+
+        registerForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const car = document.getElementById('register-car').value.trim();
+            const plate = document.getElementById('register-plate').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            const pass1 = document.getElementById('register-password').value;
+            const pass2 = document.getElementById('register-password2').value;
+            if (pass1 !== pass2) {
+                errorMessage.style.display = 'block';
+                errorMessage.style.color = '#e74c3c';
+                errorMessage.textContent = 'Пароли не совпадают!';
+                return;
+            }
+            // Проверка уникальности номера
+            const query = await db.collection('drivers').where('phone', '==', phone).get();
+            if (!query.empty) {
+                errorMessage.style.display = 'block';
+                errorMessage.style.color = '#e74c3c';
+                errorMessage.textContent = 'Водитель с таким номером уже зарегистрирован!';
+                return;
+            }
+            // Сохраняем нового водителя
+            await db.collection('drivers').add({
+                car, plate, phone, password: pass1
+            });
+            errorMessage.style.display = 'block';
+            errorMessage.style.color = '#27ae60';
+            errorMessage.textContent = 'Регистрация прошла успешно! Теперь войдите.';
+            setTimeout(() => {
+                toggleLink.onclick();
+            }, 1500);
+        };
+    </script>
+</body>
+</html> 

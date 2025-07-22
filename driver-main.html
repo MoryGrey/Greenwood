@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль Водителя</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: #191A1E;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      overflow-x: hidden;
+    }
+    .profile-header {
+      text-align: center;
+      margin-top: 32px;
+      margin-bottom: 18px;
+      animation: fadeInDown 1s cubic-bezier(.7,0,.3,1);
+    }
+    .profile-header .fa-user-circle {
+      font-size: 3.5rem;
+      color: #fff;
+      filter: drop-shadow(0 0 12px #222a);
+      margin-bottom: 8px;
+      animation: pulseGlow 2s infinite alternate;
+    }
+    .profile-header h2 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #fff;
+      text-shadow: 0 2px 12px #222a;
+    }
+    .profile-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 370px;
+      width: 92vw;
+      margin: 0 auto 24px auto;
+      animation: fadeInUp 1.2s cubic-bezier(.7,0,.3,1);
+    }
+    .card {
+      background: rgba(20,20,20,0.7);
+      backdrop-filter: blur(8px) saturate(1.1);
+      border-radius: 18px;
+      box-shadow: 0 4px 24px #000a, 0 1.5px 8px #000a;
+      padding: 22px 20px 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+    .card .icon {
+      font-size: 2.1rem;
+      color: #fff;
+      filter: drop-shadow(0 0 8px #222a);
+      min-width: 38px;
+      text-align: center;
+      animation: pulseGlow 2s infinite alternate;
+    }
+    .card .info {
+      flex: 1;
+    }
+    .card .label {
+      font-size: 1.01rem;
+      color: #bbb;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+    .card .value {
+      font-size: 1.18rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 8px #222a;
+    }
+    .card .counter {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 8px #222a;
+      margin-left: 8px;
+    }
+    .tab-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 68px;
+      background: rgba(20,20,20,0.7);
+      backdrop-filter: blur(8px) saturate(1.1);
+      box-shadow: 0 -2px 16px #000a;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+      border-radius: 18px 18px 0 0;
+      animation: fadeInUp 1.2s cubic-bezier(.7,0,.3,1);
+    }
+    .tab-item {
+      flex: 1;
+      text-align: center;
+      color: #bbb;
+      font-size: 1.1rem;
+      padding: 8px 0 0 0;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: relative;
+    }
+    .tab-item.active {
+      color: #fff;
+    }
+    .tab-item .fa {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 2px;
+      transition: color 0.2s;
+      color: #bbb;
+    }
+    .tab-item.active .fa {
+      color: #fff;
+      filter: drop-shadow(0 0 8px #222a);
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseGlow {
+      0% { filter: drop-shadow(0 0 8px #222a); }
+      100% { filter: drop-shadow(0 0 18px #222a); }
+    }
+    @media (max-width: 500px) {
+      .profile-header { margin-top: 18px; }
+      .profile-cards { gap: 12px; }
+      .card { padding: 16px 10px 12px 10px; }
+      .tab-bar { height: 60px; font-size: 0.98rem; }
+      #shiftTabContent > div { height: 50vh !important; }
+      #startShiftBtn {
+        width: 90vw !important;
+        max-width: 340px;
+        font-size: 1.1rem !important;
+        padding: 16px 0 !important;
+        margin: 0 auto !important;
+        display: block !important;
+      }
+      .shift-center-wrap { height: 100vh; }
+      .shift-btn-main { font-size: 1.05rem; padding: 15px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-header">
+    <i class="fa-solid fa-user-circle"></i>
+    <h2>Профиль водителя</h2>
+  </div>
+  <div class="profile-cards" id="profileCards">
+    <!-- Карточки с данными водителя появятся здесь -->
+  </div>
+  <div class="tab-bar">
+    <div class="tab-item active" id="tabProfile">
+      <i class="fa-solid fa-user"></i>
+      Профиль
+    </div>
+    <div class="tab-item" id="tabMain">
+      <i class="fa-solid fa-car"></i>
+      Главная
+    </div>
+    <div class="tab-item" id="tabShift">
+      <i class="fa-solid fa-clock"></i>
+      Смена
+    </div>
+  </div>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Функция красивого уведомления о завершении смены
+function showShiftEndNotification(totalTime, isError, customText) {
+  let notif = document.createElement('div');
+  notif.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(25,26,30,0.92);animation:fadeInNotif 0.7s;';
+  notif.innerHTML = `<div style="background:#232323;border-radius:22px;box-shadow:0 8px 32px #000a;padding:38px 32px 32px 32px;display:flex;flex-direction:column;align-items:center;max-width:90vw;">
+    <div style='font-size:2.2rem;color:#fff;margin-bottom:18px;'><i class='fa-solid fa-star'></i></div>
+    <div style='color:#fff;font-size:1.3rem;font-weight:600;margin-bottom:10px;'>${customText || 'Спасибо за работу!<br>Смена завершена.'}</div>
+    ${isError ? `<div style='color:#e74c3c;font-size:1.05rem;margin-top:8px;'>Ошибка при сохранении смены. Попробуйте позже.</div>` : ''}
+  </div>`;
+  document.body.appendChild(notif);
+  setTimeout(()=>{
+    notif.style.animation = 'fadeOutNotif 0.7s';
+    setTimeout(()=>notif.remove(), 700);
+  }, 4000);
+}
+    // Firebase config (тот же, что и в других файлах)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqz-IP1qgXIdPGnOOJ1diy2vcJlWnJA0A",
+      authDomain: "taxi-bbdda.firebaseapp.com",
+      projectId: "taxi-bbdda",
+      storageBucket: "taxi-bbdda.firebasestorage.app",
+      messagingSenderId: "880973833007",
+      appId: "1:880973833007:web:234deca6e3b83b474df7da",
+      measurementId: "G-H224N62NXD"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Получаем номер телефона водителя из localStorage
+    const driverPhone = localStorage.getItem('driver_phone');
+    if (!driverPhone) {
+      window.location.href = 'driver-auth.html';
+    }
+
+    let driverProfileHTML = '';
+    async function loadDriverProfile() {
+      const q = await db.collection('drivers').where('phone', '==', driverPhone).get();
+      if (q.empty) {
+        driverProfileHTML = '<div style="color:#00ff99;text-align:center;">Водитель не найден</div>';
+        document.getElementById('profileCards').innerHTML = driverProfileHTML;
+        return;
+      }
+      const driver = q.docs[0].data();
+      // Считаем количество выполненных заказов (orders с полем driverPhone и статусом done)
+      let ordersCount = 0;
+      const ordersQ = await db.collection('orders').where('driverPhone', '==', driverPhone).where('status', '==', 'done').get();
+      ordersCount = ordersQ.size;
+      // Сохраняем HTML карточек для профиля
+      driverProfileHTML = `
+        <div class="card"><span class="icon"><i class="fa-solid fa-id-card"></i></span><div class="info"><div class="label">Гос. номер</div><div class="value">${driver.plate || '-'}</div></div></div>
+        <div class="card"><span class="icon"><i class="fa-solid fa-car"></i></span><div class="info"><div class="label">Марка авто</div><div class="value">${driver.car || '-'}</div></div></div>
+        <div class="card"><span class="icon"><i class="fa-solid fa-phone"></i></span><div class="info"><div class="label">Телефон</div><div class="value">${driver.phone || '-'}</div></div></div>
+        <div class="card"><span class="icon"><i class="fa-solid fa-check-circle"></i></span><div class="info"><div class="label">Выполнено заказов</div><div class="value"><span class="counter">${ordersCount}</span></div></div></div>
+      `;
+      document.getElementById('profileCards').innerHTML = driverProfileHTML;
+    }
+    loadDriverProfile();
+
+    // Меню вкладок (только анимация переключения)
+    const tabProfile = document.getElementById('tabProfile');
+    const tabMain = document.getElementById('tabMain');
+    const tabShift = document.getElementById('tabShift');
+
+    // Вкладка Смена
+    let shiftTimer = null;
+    let shiftStart = null;
+    let shiftPaused = false;
+    let shiftPauseTime = 0;
+    let shiftTotalPaused = 0;
+    let queuePosition = null;
+    let onShift = false;
+    let busy = false;
+    const shiftTabContent = document.createElement('div');
+    shiftTabContent.id = 'shiftTabContent';
+    shiftTabContent.style = 'padding:32px 0 90px 0;text-align:center;';
+    document.body.appendChild(shiftTabContent);
+
+    async function updateQueueAndStatusUI() {
+      const driverDoc = (await db.collection('drivers').where('phone', '==', driverPhone).get()).docs[0];
+      const driverId = driverDoc.id;
+      const driverData = driverDoc.data();
+      // Проверяем очередь
+      const queueSnap = await db.collection('driverQueue').orderBy('joined').get();
+      const queue = queueSnap.docs.map(doc => ({id: doc.id, ...doc.data()}));
+      queuePosition = queue.findIndex(d => d.phone === driverPhone);
+      onShift = driverData.onShift || false;
+      busy = driverData.busy || false;
+      // Таймер
+      shiftStart = driverData.shiftStart || null;
+      shiftPaused = driverData.shiftPaused || false;
+      shiftPauseTime = driverData.shiftPauseTime || 0;
+      shiftTotalPaused = driverData.shiftTotalPaused || 0;
+      // UI
+      let html = '';
+      if (!onShift) {
+        html += `<div class='shift-center-wrap'><button id='startShiftBtn' class='shift-btn-main'>Встать на линию</button></div>`;
+      } else {
+        html += `<div class='shift-center-wrap'>`;
+        html += `<div style='font-size:1.1rem;text-align:center;'>Вы на линии</div>`;
+        html += `<div class='shift-btns-wrap' style='display:flex;flex-direction:column;align-items:center;gap:12px;'>`;
+        if (!busy) {
+          html += `<button id='busyBtn' style='background:#232323;color:#fff;font-size:1.1rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;'>Занят</button>`;
+        } else {
+          html += `<button id='freeBtn' style='background:#fff;color:#191A1E;font-size:1.1rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;'>Освободился</button>`;
+        }
+        html += `<button id='endShiftBtn' style='background:#232323;color:#fff;font-size:1.1rem;padding:10px 28px;border-radius:10px;border:none;cursor:pointer;'>Закончить смену</button>`;
+        html += `</div>`;
+        if (!busy) {
+          html += `<div style='color:#fff;font-size:1.2rem;text-align:center;'>Ваша позиция в очереди: <b>${queuePosition+1}</b></div>`;
+        } else {
+          html += `<div style='color:#fff;font-size:1.2rem;text-align:center;'>Вы заняты (не в очереди)</div>`;
+        }
+        html += `<div id='shiftTimer' style='font-size:1.3rem;margin-top:10px;text-align:center;'></div>`;
+        html += `</div>`;
+      }
+      shiftTabContent.innerHTML = html;
+      // Кнопки с оптимистичным UI
+      if (!onShift) {
+        document.getElementById('startShiftBtn').onclick = async () => {
+          // Оптимистично меняем UI
+          shiftTabContent.innerHTML = `<div class='shift-center-wrap'><div style='color:#fff;font-size:1.1rem;text-align:center;'>Вы на линии</div><div class='shift-btns-wrap' style='display:flex;flex-direction:column;align-items:center;gap:12px;'><button style='background:#232323;color:#fff;font-size:1.1rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;'>Занят</button><button style='background:#232323;color:#fff;font-size:1.1rem;padding:10px 28px;border-radius:10px;border:none;cursor:pointer;'>Закончить смену</button></div><div style='color:#fff;font-size:1.2rem;text-align:center;'>Ваша позиция в очереди: <b>1</b></div><div id='shiftTimer' style='font-size:1.3rem;margin-top:10px;text-align:center;'>Время на линии: 0ч 0м 0с</div></div>`;
+          try {
+            const now = Date.now();
+            await db.collection('drivers').doc(driverDoc.id).update({onShift:true, busy:false, shiftStart:now, shiftPaused:false, shiftPauseTime:0, shiftTotalPaused:0});
+            await db.collection('driverQueue').add({phone:driverPhone, joined:now});
+            updateQueueAndStatusUI();
+          } catch(e) {
+            alert('Ошибка! Попробуйте ещё раз.');
+            updateQueueAndStatusUI();
+          }
+        };
+      } else {
+        if (!busy) {
+          document.getElementById('busyBtn').onclick = async () => {
+            // Оптимистично меняем UI
+            shiftTabContent.innerHTML = `<div class='shift-center-wrap'><div style='color:#fff;font-size:1.1rem;text-align:center;'>Вы на линии</div><div class='shift-btns-wrap' style='display:flex;flex-direction:column;align-items:center;gap:12px;'><button style='background:#fff;color:#191A1E;font-size:1.1rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;'>Освободился</button><button style='background:#232323;color:#fff;font-size:1.1rem;padding:10px 28px;border-radius:10px;border:none;cursor:pointer;'>Закончить смену</button></div><div style='color:#fff;font-size:1.2rem;text-align:center;'>Вы заняты (не в очереди)</div><div id='shiftTimer' style='font-size:1.3rem;margin-top:10px;text-align:center;'></div></div>`;
+            try {
+              const q = await db.collection('driverQueue').where('phone','==',driverPhone).get();
+              for (const doc of q.docs) await db.collection('driverQueue').doc(doc.id).delete();
+              await db.collection('drivers').doc(driverDoc.id).update({busy:true, shiftPaused:true, shiftPauseTime:Date.now()});
+              updateQueueAndStatusUI();
+            } catch(e) {
+              alert('Ошибка! Попробуйте ещё раз.');
+              updateQueueAndStatusUI();
+            }
+          };
+        } else {
+          document.getElementById('freeBtn').onclick = async () => {
+            // Оптимистично меняем UI
+            shiftTabContent.innerHTML = `<div class='shift-center-wrap'><div style='color:#fff;font-size:1.1rem;text-align:center;'>Вы на линии</div><div class='shift-btns-wrap' style='display:flex;flex-direction:column;align-items:center;gap:12px;'><button style='background:#232323;color:#fff;font-size:1.1rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;'>Занят</button><button style='background:#232323;color:#fff;font-size:1.1rem;padding:10px 28px;border-radius:10px;border:none;cursor:pointer;'>Закончить смену</button></div><div style='color:#fff;font-size:1.2rem;text-align:center;'>Ваша позиция в очереди: <b>1</b></div><div id='shiftTimer' style='font-size:1.3rem;margin-top:10px;text-align:center;'></div></div>`;
+            try {
+              const now = Date.now();
+              await db.collection('drivers').doc(driverDoc.id).update({busy:false, shiftPaused:false, shiftTotalPaused:shiftTotalPaused + (Date.now()-shiftPauseTime), shiftPauseTime:0});
+              await db.collection('driverQueue').add({phone:driverPhone, joined:now});
+              updateQueueAndStatusUI();
+            } catch(e) {
+              alert('Ошибка! Попробуйте ещё раз.');
+              updateQueueAndStatusUI();
+            }
+          };
+        }
+        document.getElementById('endShiftBtn').onclick = async () => {
+          // Оптимистично меняем UI
+          shiftTabContent.innerHTML = `<div class='shift-center-wrap'><div style='color:#fff;font-size:1.1rem;text-align:center;'>Смена завершена</div></div>`;
+          try {
+            let totalTime = Date.now() - shiftStart - (shiftPaused ? (shiftTotalPaused + (Date.now()-shiftPauseTime)) : shiftTotalPaused);
+            await db.collection('drivers').doc(driverDoc.id).update({onShift:false, busy:false, shiftStart:null, shiftPaused:false, shiftPauseTime:0, shiftTotalPaused:0, lastShiftTime:totalTime});
+            const q = await db.collection('driverQueue').where('phone','==',driverPhone).get();
+            for (const doc of q.docs) await db.collection('driverQueue').doc(doc.id).delete();
+            showShiftEndNotification(totalTime);
+            setTimeout(() => updateQueueAndStatusUI(), 1800);
+          } catch(e) {
+            showShiftEndNotification(0, true);
+            setTimeout(() => updateQueueAndStatusUI(), 1800);
+          }
+        };
+        // Таймер
+        function renderTimer() {
+          let t = 0;
+          if (shiftStart) {
+            if (shiftPaused) {
+              t = shiftPauseTime - shiftStart - shiftTotalPaused;
+            } else {
+              t = Date.now() - shiftStart - shiftTotalPaused;
+            }
+          }
+          const h = Math.floor(t/3600000);
+          const m = Math.floor((t%3600000)/60000);
+          const s = Math.floor((t%60000)/1000);
+          const timerEl = document.getElementById('shiftTimer');
+          if (!timerEl) return;
+          timerEl.textContent = `Время на линии: ${h}ч ${m}м ${s}с`;
+        }
+        // Очищаю shiftTimer при завершении смены и смене вкладок
+        if (onShift) {
+          clearInterval(shiftTimer);
+          shiftTimer = setInterval(renderTimer, 1000);
+          renderTimer();
+        } else {
+          clearInterval(shiftTimer);
+        }
+      }
+    }
+    // --- ГЛАВНАЯ ВКЛАДКА ---
+    const mainTabContent = document.createElement('div');
+    mainTabContent.id = 'mainTabContent';
+    mainTabContent.style = 'padding:24px 0 90px 0;text-align:center;display:none;';
+    document.body.appendChild(mainTabContent);
+
+    async function renderMainTab() {
+      // Очередь водителей
+      const queueSnap = await db.collection('driverQueue').orderBy('joined').get();
+      const queue = queueSnap.docs.map(doc => doc.data());
+      const myIndex = queue.findIndex(q => q.phone === driverPhone);
+      let html = '';
+      if (myIndex !== -1) {
+        // Водитель в очереди
+        html += `<div style='text-align:center;font-size:1.18rem;font-weight:600;margin-bottom:24px;'>Вы <b>${myIndex+1}</b>-й в очереди</div>`;
+        // Локатор
+        html += `<div style='display:flex;justify-content:center;margin-bottom:24px;'><div class='locator-anim'></div></div>`;
+        // Надпись
+        html += `<div style='position:fixed;bottom:80px;left:0;width:100vw;text-align:center;font-size:1.18rem;color:#bbb;letter-spacing:1px;'>Ожидайте заказ</div>`;
+      } else {
+        // Водитель не в очереди
+        html += `<div style='text-align:center;font-size:1.25rem;font-weight:600;color:#fff;margin:40px 0 0 0;'>ВЫ НЕ В ОЧЕРЕДИ!</div>`;
+      }
+      mainTabContent.innerHTML = html;
+    }
+
+    // Локатор-анимация (CSS)
+    const styleLocator = document.createElement('style');
+    styleLocator.innerHTML = `.locator-anim{width:54px;height:54px;border:5px solid #414345;border-top:5px solid #fff;border-radius:50%;animation:spinLoc 1.1s linear infinite;box-shadow:0 0 16px #fff2;}
+    @keyframes spinLoc{0%{transform:rotate(0);}100%{transform:rotate(360deg);}}`;
+    document.head.appendChild(styleLocator);
+
+    // --- МОДАЛКА ЗАКАЗА ---
+    let orderAudio = null;
+    let orderUnsub = null;
+    function showOrderModal(order) {
+      let modal = document.createElement('div');
+      modal.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(25,26,30,0.97);animation:fadeInNotif 0.7s;';
+      modal.innerHTML = `<div style="background:#232323;border-radius:22px;box-shadow:0 8px 32px #fff2;padding:38px 32px 32px 32px;display:flex;flex-direction:column;align-items:center;max-width:90vw;min-width:260px;">
+        <div style='font-size:2.1rem;color:#fff;margin-bottom:18px;'><i class='fa-solid fa-bell'></i></div>
+        <div style='color:#fff;font-size:1.18rem;font-weight:600;margin-bottom:10px;'>Новый заказ!</div>
+        <div style='color:#bbb;font-size:1.05rem;margin-bottom:8px;'>Откуда: <b>${order.from||'-'}</b></div>
+        <div style='color:#bbb;font-size:1.05rem;margin-bottom:8px;'>Куда: <b>${order.to||'-'}</b></div>
+        <div style='color:#bbb;font-size:1.05rem;margin-bottom:8px;'>Телефон клиента: <b>${order.phone||'-'}</b></div>
+        <div style='color:#bbb;font-size:1.05rem;margin-bottom:18px;'>Детское кресло: <b>${order.childSeat ? 'Да' : 'Нет'}</b></div>
+        <button id='acceptOrderBtn' style='background:linear-gradient(90deg,#232526 0%,#414345 100%);color:#fff;font-size:1.1rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;'>Принять заказ</button>
+      </div>`;
+      document.body.appendChild(modal);
+      // Звук
+      orderAudio = new Audio('serena.mp3');
+      orderAudio.loop = true;
+      orderAudio.volume = 1;
+      orderAudio.play();
+      document.getElementById('acceptOrderBtn').onclick = async () => {
+        orderAudio.pause();
+        orderAudio.currentTime = 0;
+        modal.remove();
+        // Обновляем заказ: назначаем водителя и статус
+        await db.collection('orders').doc(order.id).update({driverPhone: driverPhone, status: 'accepted'});
+        showShiftEndNotification(0, false, 'Заказ принят!');
+      };
+    }
+
+    // Слежение за заказами для первого в очереди
+    async function subscribeOrderForFirstDriver() {
+      if (orderUnsub) orderUnsub();
+      const queueSnap = await db.collection('driverQueue').orderBy('joined').get();
+      const queue = queueSnap.docs.map(doc => doc.data());
+      if (queue.length && queue[0].phone === driverPhone) {
+        console.log('[Driver] Я первый в очереди, подписываюсь на новые заказы...');
+        orderUnsub = db.collection('orders').where('status','==','wait').where('driverPhone','==',null).onSnapshot(snap => {
+          console.log('[Driver] Получено заказов:', snap.size);
+          if (!snap.empty) {
+            const order = {id:snap.docs[0].id, ...snap.docs[0].data()};
+            console.log('[Driver] Новый заказ для меня:', order);
+            showOrderModal(order);
+          } else {
+            console.log('[Driver] Нет подходящих заказов (status=wait, driverPhone=null)');
+          }
+        }, err => {
+          console.error('[Driver] Ошибка подписки на заказы:', err);
+        });
+      } else {
+        console.log('[Driver] Я не первый в очереди или не в очереди, не подписываюсь на заказы');
+        if (orderUnsub) orderUnsub();
+      }
+    }
+
+    // --- Переключение вкладок ---
+    const origTabShiftOnClick = tabShift.onclick;
+    tabShift.onclick = () => {
+      tabProfile.classList.remove('active');
+      tabMain.classList.remove('active');
+      tabShift.classList.add('active');
+      document.querySelector('.profile-header').style.display = 'none';
+      document.getElementById('profileCards').style.display = 'none';
+      shiftTabContent.style.display = '';
+      mainTabContent.style.display = 'none';
+      updateQueueAndStatusUI();
+    };
+    // Скрывать смену при других вкладках
+    const origTabProfileOnClick = tabProfile.onclick;
+    tabProfile.onclick = () => {
+      tabProfile.classList.add('active');
+      tabMain.classList.remove('active');
+      tabShift.classList.remove('active');
+      document.querySelector('.profile-header').style.display = '';
+      document.getElementById('profileCards').style.display = '';
+      shiftTabContent.style.display = 'none';
+      document.getElementById('profileCards').innerHTML = driverProfileHTML;
+      clearInterval(shiftTimer);
+    };
+    tabMain.onclick = () => {
+      tabProfile.classList.remove('active');
+      tabMain.classList.add('active');
+      tabShift.classList.remove('active');
+      document.querySelector('.profile-header').style.display = 'none';
+      document.getElementById('profileCards').style.display = 'none';
+      shiftTabContent.style.display = 'none';
+      mainTabContent.style.display = '';
+      renderMainTab();
+      subscribeOrderForFirstDriver();
+      clearInterval(shiftTimer);
+    };
+  </script>
+  <!-- Добавляю анимации для fadeInNotif и fadeOutNotif -->
+  <style>
+    @keyframes fadeInNotif{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+    @keyframes fadeOutNotif{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(0.95);}}
+  </style>
+  <!-- Добавляю стили для shift-center-wrap и shift-btn-main -->
+  <style>
+    .shift-center-wrap {
+      width: 100vw;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background: #191A1E;
+      z-index: 5;
+      padding-top: 32px;
+      gap: 14px;
+    }
+    .shift-btn-main {
+      background: linear-gradient(90deg, #232526 0%, #414345 100%);
+      color: #fff;
+      font-size: 1.18rem;
+      font-weight: 700;
+      padding: 18px 0;
+      width: 92vw;
+      max-width: 340px;
+      border-radius: 14px;
+      border: none;
+      box-shadow: 0 4px 24px #000a, 0 1.5px 8px #000a;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      display: block;
+      letter-spacing: 1px;
+      backdrop-filter: blur(8px) saturate(1.1);
+    }
+    .shift-btn-main:active, .shift-btn-main:hover {
+      background: linear-gradient(90deg, #414345 0%, #232526 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px #000a;
+    }
+    @media (max-width: 500px) {
+      .shift-center-wrap { height: 100vh; }
+      .shift-btn-main { font-size: 1.05rem; padding: 15px 0; }
+    }
+  </style>
+</body>
+</html> 
